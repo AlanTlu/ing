@@ -97,7 +97,7 @@ docker compose run --build --rm ing-tests
 Obraz Docker zawiera przeglądarki zgodne z wersją Playwright w `pom.xml`.
 Raporty pozostają w lokalnym katalogu `target`.
 
-Przykładowy pipeline [GitHub Actions](.github/workflows/e2e.yml) ma macierz
+Przykładowy pipeline [GitHub Actions](../.github/workflows/e2e.yml) ma macierz
 `chromium`, `firefox`, `webkit`. Każdy job instaluje swój silnik, uruchamia test
 i publikuje artefakty. Joby mogą działać równolegle zależnie od dostępnych runnerów.
 Plik jest przykładem realizacji CI; lokalne uruchomienie nie wymaga Gita ani GitHuba.
