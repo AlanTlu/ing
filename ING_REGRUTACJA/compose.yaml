@@ -1,0 +1,8 @@
+services:
+  ing-tests:
+    build:
+      context: .
+    environment:
+      ING_BASE_URL: ${ING_BASE_URL:-https://www.ing.pl/}
+    volumes:
+      - ./target:/workspace/target
