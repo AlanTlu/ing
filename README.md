@@ -21,9 +21,23 @@ prawo wykonania przez `chmod +x mvnw`.
 
 ## Pipeline
 
-Workflow [`.github/workflows/e2e.yml`](.github/workflows/e2e.yml) uruchamia
-osobne joby dla Chromium, Firefox i WebKit. Każdy job instaluje swój silnik,
-wykonuje test i zapisuje raporty, screenshoty oraz trace jako artefakt.
+Workflow [`.github/workflows/e2e.yml`](.github/workflows/e2e.yml) uruchamia jeden
+job na runnerze Windows z etykietą `ing-local`. JUnit wykonuje w nim test
+równolegle w Chromium, Firefox i WebKit. Raporty, screenshoty oraz trace
+są zapisywane jako artefakt.
 
-Pipeline działa po pushu do `main`, dla pull requestów i po ręcznym uruchomieniu
-w zakładce Actions. Joby mogą działać równolegle zależnie od dostępnych runnerów.
+Pipeline uruchamia się ręcznie w zakładce Actions, wyłącznie z gałęzi `main`.
+Nie wykonuje kodu z pull requestów. Runner musi być uruchomiony przed startem joba.
+
+ING wyświetlało runnerom chmurowym GitHuba ekran hCaptcha zamiast strony z panelem
+cookies. Dlatego test wymaga środowiska z dostępem do zwykłej strony ING.
+
+Na skonfigurowanym komputerze Windows runnera można uruchomić poleceniem:
+
+```powershell
+& "$env:LOCALAPPDATA\GitHubActionsRunners\ING_REGRUTACJA\Start-Runner.cmd"
+```
+
+Runner kończy pracę po jednym jobie. Do kolejnego uruchomienia powtórz polecenie,
+a następnie wybierz `Actions > ING_REGRUTACJA > Run workflow`.
+Instalacja runnera i jego poświadczenia pozostają poza repozytorium.

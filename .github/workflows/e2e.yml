@@ -1,31 +1,33 @@
 name: ING_REGRUTACJA
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ing-local
+  cancel-in-progress: false
+
 jobs:
   cookie-consent:
-    name: ${{ matrix.browser }}
-    runs-on: ubuntu-latest
+    name: Chromium, Firefox and WebKit
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, Windows, X64, ing-local]
     timeout-minutes: 15
     defaults:
       run:
+        shell: powershell
         working-directory: ING_REGRUTACJA
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        browser: [chromium, firefox, webkit]
+    env:
+      MAVEN_OPTS: -Djavax.net.ssl.trustStoreType=Windows-ROOT
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Java 21
         uses: actions/setup-java@v4
@@ -35,25 +37,22 @@ jobs:
           cache: maven
           cache-dependency-path: ING_REGRUTACJA/pom.xml
 
-      - name: Make Maven Wrapper executable
-        run: chmod +x mvnw
-
-      - name: Install ${{ matrix.browser }} with system dependencies
+      - name: Install browsers
         run: >-
-          ./mvnw --batch-mode --no-transfer-progress exec:java
-          -Dexec.mainClass=com.microsoft.playwright.CLI
-          -Dexec.args="install --with-deps ${{ matrix.browser }}"
+          .\mvnw.cmd --batch-mode --no-transfer-progress exec:java
+          '-Dexec.mainClass=com.microsoft.playwright.CLI'
+          '-Dexec.args=install chromium firefox webkit'
 
-      - name: Run test in ${{ matrix.browser }}
-        run: >-
-          ./mvnw --batch-mode --no-transfer-progress
-          -Dbrowser=${{ matrix.browser }} clean test
+      - name: Run three browsers in parallel
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+        run: .\mvnw.cmd --batch-mode --no-transfer-progress '-Dbrowser=all' clean test
 
       - name: Upload reports, screenshots and traces
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ing-cookie-${{ matrix.browser }}
+          name: ing-cookie-all-browsers
           path: |
             ING_REGRUTACJA/target/surefire-reports/
             ING_REGRUTACJA/target/artifacts/
