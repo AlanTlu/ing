@@ -1,7 +1,7 @@
 # ING — test zgody na cookies analityczne
 
 Projekt Java + Playwright znajduje się w katalogu `ING_REGRUTACJA`.
-Test działa równolegle w Chromium, Firefox i WebKit.
+Ten sam scenariusz wykonuje się równolegle w Chromium, Firefox i WebKit.
 
 ## Uruchomienie lokalne
 
@@ -17,27 +17,48 @@ cd ING_REGRUTACJA
 Na Linuxie i macOS użyj `./mvnw` zamiast `.\mvnw.cmd`, wcześniej nadając skryptowi
 prawo wykonania przez `chmod +x mvnw`.
 
-[Pełna instrukcja, opis scenariusza i konfiguracji](ING_REGRUTACJA/README.md).
+[Pełna instrukcja lokalna, scenariusz, opcje i Docker](ING_REGRUTACJA/README.md).
 
 ## Pipeline
 
-Workflow [`.github/workflows/e2e.yml`](.github/workflows/e2e.yml) uruchamia jeden
-job na runnerze Windows z etykietą `ing-local`. JUnit wykonuje w nim test
-równolegle w Chromium, Firefox i WebKit. Raporty, screenshoty oraz trace
-są zapisywane jako artefakt.
+Workflow [`.github/workflows/e2e.yml`](.github/workflows/e2e.yml) działa w GitHub
+Actions na lokalnym runnerze Windows z etykietą `ing-local`. Jeden job uruchamia
+przez JUnit trzy warianty testu równolegle.
 
-Pipeline uruchamia się ręcznie w zakładce Actions, wyłącznie z gałęzi `main`.
-Nie wykonuje kodu z pull requestów. Runner musi być uruchomiony przed startem joba.
+ING wyświetlało runnerom chmurowym GitHuba ekran hCaptcha. Dlatego wykonanie
+scenariusza w pipeline przeniesiono na komputer mający dostęp do zwykłej strony ING.
 
-ING wyświetlało runnerom chmurowym GitHuba ekran hCaptcha zamiast strony z panelem
-cookies. Dlatego test wymaga środowiska z dostępem do zwykłej strony ING.
+Na skonfigurowanym komputerze:
 
-Na skonfigurowanym komputerze Windows runnera można uruchomić poleceniem:
+1. Uruchom runnera w osobnym oknie PowerShell:
 
-```powershell
-& "$env:LOCALAPPDATA\GitHubActionsRunners\ING_REGRUTACJA\Start-Runner.cmd"
-```
+   ```powershell
+   & "$env:LOCALAPPDATA\GitHubActionsRunners\ING_REGRUTACJA\Start-Runner.cmd"
+   ```
 
-Runner kończy pracę po jednym jobie. Do kolejnego uruchomienia powtórz polecenie,
-a następnie wybierz `Actions > ING_REGRUTACJA > Run workflow`.
-Instalacja runnera i jego poświadczenia pozostają poza repozytorium.
+2. Poczekaj na komunikat `Listening for Jobs`.
+3. Otwórz [Actions → ING_REGRUTACJA](https://github.com/AlanTlu/ing/actions/workflows/e2e.yml),
+   wybierz `Run workflow`, gałąź `main` i zatwierdź uruchomienie.
+4. Sprawdź job `Chromium, Firefox and WebKit` oraz artefakt `ing-cookie-all-browsers`.
+
+Workflow uruchamia się wyłącznie ręcznie z `main`. Push ani pull request go nie
+uruchamia. Skrypt runnera kończy pracę po jednym jobie; przed kolejnym wykonaniem
+trzeba uruchomić go ponownie. Nie jest zainstalowany jako usługa Windows.
+
+[Konfiguracja runnera, przebieg joba i rozwiązywanie problemów](docs/CI.md).
+
+## Zweryfikowany wynik
+
+[Zakończony sukcesem pipeline](https://github.com/AlanTlu/ing/actions/runs/41549859788)
+wykonał na runnerze `ing-local` **3 testy: 0 błędów, 0 niepowodzeń, 0 pominiętych**.
+Raport JUnit oraz screenshoty i trace dla każdej przeglądarki są dostępne
+w artefakcie tego uruchomienia. Artefakty przechowywane są przez 14 dni.
+
+## Struktura
+
+- `.github/workflows/e2e.yml` — ręcznie uruchamiany pipeline.
+- `docs/CI.md` — instrukcja obsługi runnera i wyników.
+- `ING_REGRUTACJA/` — projekt Maven, testy, Maven Wrapper i konfiguracja Docker.
+
+Instalacja runnera, plik certyfikatów oraz jego poświadczenia pozostają poza
+repozytorium.

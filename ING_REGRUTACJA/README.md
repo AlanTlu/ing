@@ -5,6 +5,9 @@ Java 21, Maven Wrapper, Playwright 1.64.0, JUnit 5 i AssertJ.
 
 ## Uruchomienie
 
+Polecenia z tej instrukcji wykonuj w katalogu `ING_REGRUTACJA`.
+Jeśli zaczynasz w głównym katalogu repozytorium, najpierw wykonaj `cd ING_REGRUTACJA`.
+
 Wymagany jest JDK 21 lub nowszy oraz dostęp do Internetu. Otwórz `pom.xml`
 jako projekt Maven w IntelliJ lub wykonaj poniższe polecenia w katalogu projektu.
 
@@ -90,27 +93,40 @@ Trace można otworzyć lokalnie:
 
 ## Docker i CI
 
+Docker jest niezależnym sposobem uruchomienia testów lokalnie:
+
 ```powershell
 docker compose run --build --rm ing-tests
 ```
 
 Obraz Docker zawiera przeglądarki zgodne z wersją Playwright w `pom.xml`.
 Raporty pozostają w lokalnym katalogu `target`.
+Kontener również musi mieć dostęp do zwykłej strony ING.
 
-Pipeline [GitHub Actions](../.github/workflows/e2e.yml) uruchamia się ręcznie
-z gałęzi `main` na runnerze Windows z etykietą `ing-local`. Jeden job wykonuje
-trzy warianty testu równolegle przez JUnit i publikuje artefakty.
+Pipeline [GitHub Actions](../.github/workflows/e2e.yml) korzysta z lokalnego
+runnera Windows z etykietą `ing-local`. Uruchamia się ręcznie z gałęzi `main`.
+Jeden job wykonuje trzy warianty testu równolegle przez JUnit i publikuje artefakt
+`ing-cookie-all-browsers`, przechowywany przez 14 dni.
 
 ING blokowało runnerów chmurowych ekranem hCaptcha. Runner lokalny musi mieć
-dostęp do zwykłej strony banku. [Instrukcja uruchomienia runnera](../README.md#pipeline).
+dostęp do zwykłej strony banku. Przed wykonaniem pipeline'u uruchom runnera;
+po jednym jobie jego proces się zamyka. Nie jest instalowany jako usługa Windows.
+[Obsługa runnera, raporty i rozwiązywanie problemów](../docs/CI.md).
 Lokalne uruchomienie Mavena nie wymaga Gita ani GitHuba.
+
+Weryfikacja w [GitHub Actions](https://github.com/AlanTlu/ing/actions/runs/41549859788)
+zakończyła się wynikiem: 3 testy, 0 błędów, 0 niepowodzeń i 0 pominięć.
 
 ## Pakowanie
 
-Projekt można przekazać jako ZIP. Przy pakowaniu pomiń wygenerowane katalogi
-`target`, `.idea` i pliki `*.iml`. Raporty i trace mogą zawierać lokalne ścieżki
-oraz dane sesji przeglądarki. Zachowaj źródła, Maven Wrapper, `pom.xml`, README
-i konfigurację Docker oraz CI.
+Projekt można przekazać jako ZIP. Pakuj od katalogu głównego repozytorium,
+zachowując `.github/workflows`, `docs`, główny README i folder `ING_REGRUTACJA`
+razem z `.mvn/wrapper`, źródłami, `pom.xml`, skryptami Maven i konfiguracją Docker.
+Foldery zaczynające się kropką są potrzebne do działania Wrappera i CI.
+
+Pomiń `.git`, wygenerowane katalogi `target`, `.idea` i pliki `*.iml`.
+Raporty i trace mogą zawierać lokalne ścieżki oraz dane sesji przeglądarki.
+Instalacja runnera, plik certyfikatów i jego poświadczenia pozostają poza paczką.
 
 ## Certyfikaty
 
